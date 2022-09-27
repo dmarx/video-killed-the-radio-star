@@ -36,7 +36,7 @@ def whisper_transcribe(
     return whispers
 
 
-def whisper_align(whispers)
+def whisper_align(whispers):
     # sanitize and tokenize
     whispers_tokens = {}
     for k in whispers:
@@ -79,30 +79,31 @@ def whisper_transmit_meta_across_alignment(
     token_tinyindex_segmentations = {}
     for rec in tokenized_prompts_tiny:
         for j, idx in enumerate(rec['indices']):
-        token_tinyindex_segmentations[idx] ={
-            'token':rec['tokens'][j],
-            'start':rec['start'],
-            'end':rec['end'],
-        }
+            token_tinyindex_segmentations[idx] ={
+                'token':rec['tokens'][j],
+                'start':rec['start'],
+                'end':rec['end'],
+            }
+    
     #token_tinyindex_segmentations
     token_large_index_segmentations = {}
     for i, result in enumerate(large2tiny):
         rec_large = {'token':whispers_tokens['large'][i]}
         for j in result:
-        rec_tiny = token_tinyindex_segmentations[j]
-        if not rec_large.get('start'):
-            rec_large['start'] = rec_tiny['start']
-            rec_large['end'] = rec_tiny['end']
+            rec_tiny = token_tinyindex_segmentations[j]
+            if not rec_large.get('start'):
+                rec_large['start'] = rec_tiny['start']
+                rec_large['end'] = rec_tiny['end']
         
         # handle null result. this could be more elegant/DRY, but this way is less confusing to me at least.
         # basically, we're just backfilling here, so each entry will have a start and end time
         if not rec_large.get('start'):
-        if i == 0:
-            rec_large['start'] = 0
-        else:
-            rec_prev = token_large_index_segmentations[i-1]
-            rec_large['start'] = rec_prev['start']
-            rec_large['end'] = rec_prev['end']
+            if i == 0:
+                rec_large['start'] = 0
+            else:
+                rec_prev = token_large_index_segmentations[i-1]
+                rec_large['start'] = rec_prev['start']
+                rec_large['end'] = rec_prev['end']
         
         token_large_index_segmentations[i] = rec_large
     
