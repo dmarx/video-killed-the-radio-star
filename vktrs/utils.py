@@ -2,6 +2,7 @@ import pandas as pd
 import string
 import subprocess
 import textwrap
+from PIL import Image, ImageDraw, ImageFont
 
 def gpu_info():
     outv = subprocess.run([
