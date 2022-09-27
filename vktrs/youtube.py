@@ -26,7 +26,7 @@ class YoutubeHelper:
         #with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         self.ydl = yt_dlp.YoutubeDL(ydl_opts)
         self.info = self.ydl.extract_info(video_url, download=True)
-        self.subs = self.get_subtitles()
+        #self.subs = self.get_subtitles()
         #self.audio = self.get_audio()
 
     def get_subtitles(
