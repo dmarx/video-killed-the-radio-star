@@ -162,6 +162,14 @@ def whisper_segment_transcription(
             end_prev = rec['end']
             continue
 
+    # how about we not drop the last lyric?
+    # should this be a for-finally clause?
+    token_large_phrase_segmentations.append({
+            'tokens': current_phrase,
+            'start':start_prev,
+            'end':end_prev,
+        })
+
     # reshape the data structure
     prompt_starts = [
             {'ts':rec['start'],
