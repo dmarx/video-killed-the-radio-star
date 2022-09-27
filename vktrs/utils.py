@@ -86,4 +86,4 @@ def save_frame(
         name = rand_str()
     outpath = root_path / f"{idx}-{name}.png"
     img.save(outpath)
-    return outpath
+    return str(outpath)
