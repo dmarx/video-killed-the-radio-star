@@ -31,7 +31,6 @@ def get_image_for_prompt(prompt, max_retries=3, **kargs):
             print("runtime error")
             max_retries -= 1
             warnings.warn(f"mitigation triggered, retries remaining: {max_retries}")
-    print("exiting image getter...")
 
 
 def process_response(answers):
