@@ -5,6 +5,12 @@ from bs4 import BeautifulSoup
 import yt_dlp
 
 
+# embedding yt-dlp instead of CLI let's us hold on to the output filepaths
+# probably way more trouble than it's worth and should just use yt-dlp CLI
+#video_url = 'https://www.youtube.com/watch?v=WJaxFbdjm8c'
+#!yt-dlp --write-auto-subs {video_url}
+
+
 # I still have mixed feelings about using this helper class vs. just using the yt-dlp cli
 class YoutubeHelper:
     def __init__(

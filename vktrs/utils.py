@@ -1,7 +1,10 @@
-import pandas as pd
+from pathlib import Path
+import random
 import string
 import subprocess
 import textwrap
+
+import pandas as pd
 from PIL import Image, ImageDraw, ImageFont
 
 def gpu_info():
@@ -66,3 +69,21 @@ def add_caption2image(
     )
 
     return image
+
+
+def rand_str(n_char=5):
+    return ''.join(random.choice(string.ascii_lowercase) for i in range(n_char))
+
+
+def save_frame(
+    img: Image,
+    idx:int=0,
+    root_path=Path('./frames'),
+    name=None,
+):
+    root_path.mkdir(parents=True, exist_ok=True)
+    if name is None:
+        name = rand_str()
+    outpath = root_path / f"{idx}-{name}.png"
+    img.save(outpath)
+    return outpath
