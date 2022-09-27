@@ -1,0 +1,40 @@
+[build-system]
+requires = ["setuptools", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "vktrs"
+description = "Video Killed The Radio Star"
+readme = "README.md"
+requires-python = ">=3.7"
+license = {text="MIT"}
+dependencies = [
+    'yt-dlp',
+    'python-tsp',
+    'webvtt-py', # only need this if srv2 isn't available
+    'pytokenizations',
+    ###################
+    #bunch of other requirements because colab...
+    ###################
+    #'torch',
+    'pandas',
+    #'pillow',
+    'beautifulsoup4',
+    'omegaconf',
+    'scipy',
+    'toolz',
+    'numpy',
+    'lxml',
+]
+dynamic = ["version"]
+
+[project.optional-dependencies]
+api = ["stability-sdk>=0.2.1"]
+
+[tool.setuptools.packages.find]
+where =["."]
+include = ["vktrs*"]
+exclude = ["tests*"]
+
+[tool.setuptools.dynamic]
+version = {file = "VERSION"}
