@@ -1,7 +1,7 @@
 import pandas as pd
 import string
 import subprocess
-
+import textwrap
 
 def gpu_info():
     outv = subprocess.run([
