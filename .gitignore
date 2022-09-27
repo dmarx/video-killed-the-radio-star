@@ -5,3 +5,5 @@
 *.mp4
 *.pyc
 *.egg-info/
+frames
+*.yaml
