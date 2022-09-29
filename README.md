@@ -56,3 +56,13 @@ greater detail after the implementation stabilizes a bit more.
 
 Most of the functionality in this notebook has been offloaded to library I published to pypi called `vktrs`. I strongly encourage you to import anything you need 
 from there rather than cutting and pasting function into a notebook. Similarly, if you have ideas for improvements, please don't hesitate to submit a PR!
+
+## Dev notes
+
+installing unreleased package in colab:
+
+```
+!pip install --upgrade setuptools
+!git clone --branch hf https://github.com/dmarx/video-killed-the-radio-star/
+!cd video-killed-the-radio-star;  python -m build; python -m pip install .[api,hf]
+```
