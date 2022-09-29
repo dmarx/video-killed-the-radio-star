@@ -49,12 +49,12 @@ class HfHelper:
                 use_auth_token=True
             )
             img2img = img2img.to(self.device)
-            img2img.save_pretrained(model_path)
+            img2img.save_pretrained(self.model_path)
         else:
             img2img = StableDiffusionImg2ImgPipeline.from_pretrained(
-                model_path,
+                self.model_path,
                 local_files_only=True
-            ).to(device)
+            ).to(self.device)
 
         text2img = StableDiffusionPipeline(
             vae=img2img.vae,
@@ -66,8 +66,10 @@ class HfHelper:
             safety_checker=img2img.safety_checker,
         )
         #return text2img, img2img
-        self.text2img = text2img.enable_attention_slicing()
-        self.img2img = img2img.enable_attention_slicing()
+        text2img.enable_attention_slicing()
+        img2img.enable_attention_slicing()
+        self.text2img = text2img
+        self.img2img = img2img
 
     def get_image_for_prompt(
         self,
@@ -77,7 +79,8 @@ class HfHelper:
         f = self.text2img if kwargs.get('init_image') is None else self.img2img
         #if kwargs.get('image_consistency') is not None:
         #kwargs['strength'] = 1- kwargs['image_consistency'] 
-        kwargs['strength'] = kwargs['start_schedule'] 
-        with autocast(device):
+        if kwargs.get('start_schedule') is not None:
+            kwargs['strength'] = kwargs['start_schedule'] 
+        with autocast(self.device):
             return f(prompt, **kwargs).images
 
