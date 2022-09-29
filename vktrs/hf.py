@@ -80,7 +80,8 @@ class HfHelper:
         #if kwargs.get('image_consistency') is not None:
         #kwargs['strength'] = 1- kwargs['image_consistency'] 
         if kwargs.get('start_schedule') is not None:
-            kwargs['strength'] = kwargs['start_schedule'] 
+            #kwargs['strength'] = kwargs['start_schedule']
+            kwargs['strength'] = kwargs.pop('start_schedule')
         with autocast(self.device):
             return f(prompt, **kwargs).images
 
