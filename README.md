@@ -62,7 +62,7 @@ from there rather than cutting and pasting function into a notebook. Similarly, 
 installing unreleased package in colab:
 
 ```
-!pip install --upgrade setuptools
+!pip install --upgrade setuptools build
 !git clone --branch hf https://github.com/dmarx/video-killed-the-radio-star/
 !cd video-killed-the-radio-star;  python -m build; python -m pip install .[api,hf]
 ```
