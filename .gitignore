@@ -10,3 +10,13 @@ frames
 *.whl
 *.tar.gz
 dist
+
+# local huggingface model directories and files
+feature_extractor
+safety_checker
+scheduler
+text_encoder
+tokenizer
+unet
+vae
+model_index.json
