@@ -132,7 +132,7 @@ def whisper_segment_transcription(
             print("still in phrase")
             current_phrase.append(rec['token'])
             start_prev = rec['start']
-            end_prev = rec.('end')
+            end_prev = rec.get('end')
             continue
 
         # we're in the next phrase, 
