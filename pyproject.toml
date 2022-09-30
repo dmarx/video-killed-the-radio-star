@@ -30,6 +30,7 @@ dynamic = ["version"]
 
 [project.optional-dependencies]
 api = ["stability-sdk>=0.2.1"]
+hf = ["diffusers","transformers","ftfy"]
 
 [tool.setuptools.packages.find]
 where =["."]
