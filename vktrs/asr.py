@@ -105,7 +105,7 @@ def whisper_transmit_meta_across_alignment(
             else:
                 rec_prev = token_large_index_segmentations[i-1]
                 rec_large['start'] = rec_prev['start']
-                rec_large['end'] = rec_prev['end']
+                rec_large['end'] = rec_prev.get('end')
         
         token_large_index_segmentations[i] = rec_large
     
