@@ -83,5 +83,4 @@ class HfHelper:
             #kwargs['strength'] = kwargs['start_schedule']
             kwargs['strength'] = kwargs.pop('start_schedule')
         with autocast(self.device):
-            return f(prompt, **kwargs).images
-
+            return f(prompt, **kwargs)
