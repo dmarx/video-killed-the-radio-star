@@ -27,6 +27,19 @@ def gpu_info():
     return pd.DataFrame({' '.join(k.strip().split('.')).capitalize():v for k,v in zip(header.split(','), rec.split(','))}, index=[0]).T
 
 
+def get_audio_duration_seconds(audio_fpath):
+    outv = subprocess.run([
+        'ffprobe'
+        ,'-i',audio_fpath
+        ,'-show_entries', 'format=duration'
+        ,'-v','quiet'
+        ,'-of','csv=p=0'
+        ],
+        stdout=subprocess.PIPE
+        ).stdout.decode('utf-8')
+    return float(outv.strip())
+
+
 def remove_punctuation(s):
     # https://stackoverflow.com/a/266162/819544
     return s.translate(str.maketrans('', '', string.punctuation))
