@@ -7,6 +7,7 @@ import textwrap
 import pandas as pd
 from PIL import Image, ImageDraw, ImageFont
 
+
 def gpu_info():
     outv = subprocess.run([
         'nvidia-smi',
@@ -40,6 +41,10 @@ def get_audio_duration_seconds(audio_fpath):
     return float(outv.strip())
 
 
+def rand_str(n_char=5):
+    return ''.join(random.choice(string.ascii_lowercase) for i in range(n_char))
+
+
 def remove_punctuation(s):
     # https://stackoverflow.com/a/266162/819544
     return s.translate(str.maketrans('', '', string.punctuation))
@@ -53,6 +58,7 @@ def sanitize_folder_name(fp):
             token = '-'
         outv += token
     return outv
+
 
 def add_caption2image(
       image, 
@@ -92,10 +98,6 @@ def add_caption2image(
     return image
 
 
-def rand_str(n_char=5):
-    return ''.join(random.choice(string.ascii_lowercase) for i in range(n_char))
-
-
 def save_frame(
     img: Image,
     idx:int=0,
@@ -108,3 +110,44 @@ def save_frame(
     outpath = root_path / f"{idx}-{name}.png"
     img.save(outpath)
     return str(outpath)
+
+
+def get_image_sequence(idx, root, init_first=True):
+    root = Path(root)
+    images = (root / 'frames' ).glob(f'{idx}-*.png')
+    images = [str(fp) for fp in images]
+    if init_first:
+        init_image = None
+        images2 = []
+        for i, fp in enumerate(images):
+            if 'anchor' in fp:
+                init_image = fp
+            else:
+                images2.append(fp)
+        if not init_image:
+            try:
+                init_image, images2 = images2[0], images2[1:]
+                images = [init_image] + images2
+            except IndexError:
+                images = images2
+    return images
+
+
+def archive_images(idx, root, archive_root = None):
+    root = Path(root)
+    if archive_root is None:
+        archive_root = root / 'archive'
+    archive_root = Path(archive_root)
+    archive_root.mkdir(parents=True, exist_ok=True)
+    old_images = get_image_sequence(idx, root=root)
+    if not old_images:
+        return
+    print(f"moving {len(old_images)} old images for scene {idx} to {archive_root}")
+    for old_fp in old_images:
+        old_fp = Path(old_fp)
+        im_name = Path(old_fp.name)
+        new_path = archive_root / im_name
+        if new_path.exists():
+            im_name = f"{im_name.stem}-{time.time()}{im_name.suffix}"
+            new_path = archive_root / im_name
+        old_fp.rename(new_path)
