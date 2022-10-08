@@ -45,6 +45,14 @@ def remove_punctuation(s):
     return s.translate(str.maketrans('', '', string.punctuation))
 
 
+def sanitize_folder_name(fp):
+    outv = ''
+    whitelist = string.ascii_letters + string.digits + '-_'
+    for token in str(fp):
+        if token not in whitelist:
+            token = '-'
+        outv += token
+    return outv
 
 def add_caption2image(
       image, 
