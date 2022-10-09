@@ -119,17 +119,14 @@ def whisper_segment_transcription(
     apply whisper-tiny segmentations to whisper-large transcriptions
 
     """
-
     token_large_phrase_segmentations = []
     start_prev = 0
     end_prev=0
     current_phrase = []
     for rec in token_large_index_segmentations.values():
-        #print(current_phrase)
-        #print(start_prev, end_prev, rec)
+
         # we're in the same phrase as previous step
         if rec['start'] == start_prev:
-            #print("still in phrase")
             current_phrase.append(rec['token'])
             start_prev = rec['start']
             end_prev = rec.get('end')
@@ -145,7 +142,6 @@ def whisper_segment_transcription(
 
         # ...which starts immediately after the previous phrase
         if rec['start'] == end_prev:
-            #print("new starts where expected")
             current_phrase.append(rec['token'])
             start_prev = rec['start']
             end_prev = rec['end']
@@ -156,7 +152,6 @@ def whisper_segment_transcription(
         else:
             #raise NotImplementedError
             # let's just do.. this? for now? I guess?
-            #print("ruh roh")
             current_phrase.append(rec['token'])
             start_prev = rec['start']
             end_prev = rec['end']
@@ -173,7 +168,6 @@ def whisper_segment_transcription(
     # reshape the data structure
     prompt_starts = [
             {'ts':rec['start'],
-            'td':dt.timedelta(seconds=rec['start']),
             'prompt':' '.join(rec['tokens'])
             }
         for rec in token_large_phrase_segmentations]
