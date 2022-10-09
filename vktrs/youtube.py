@@ -91,7 +91,7 @@ def srv2_to_token_timestamps(srv2_xml):
         {
          'ts_str':e['t'], 
          'tok':e.text,
-         'ts':dt.timedelta(milliseconds=int(e['t'])).total_seconds
+         'ts':dt.timedelta(milliseconds=int(e['t'])).total_seconds()
          } 
         for e in srv2_soup.find_all('text')
         if e.text.strip() 
