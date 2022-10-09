@@ -3,6 +3,7 @@ import random
 import string
 import subprocess
 import textwrap
+import time
 
 import pandas as pd
 from PIL import Image, ImageDraw, ImageFont
