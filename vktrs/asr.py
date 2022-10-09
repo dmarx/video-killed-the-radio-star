@@ -5,12 +5,12 @@ Currently uses openai/whisper. To install:
   pip install git+https://github.com/openai/whisper
 """
 
-import datetime as dt
 import time
 
 import tokenizations
 from vktrs.utils import remove_punctuation
 import whisper
+
 
 def whisper_transcribe(
     audio_fpath="audio.mp3",
@@ -173,7 +173,6 @@ def whisper_segment_transcription(
         for rec in token_large_phrase_segmentations]
     
     return prompt_starts
-
 
 
 def whisper_lyrics(audio_fpath="audio.mp3"):

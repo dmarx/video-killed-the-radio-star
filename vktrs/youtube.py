@@ -53,7 +53,7 @@ def parse_timestamp(ts):
         minutes=t.minute,
         seconds=t.second,
         microseconds=t.microsecond,
-        )
+        ).total_seconds()
 
 def vtt_to_token_timestamps(captions):
 
@@ -76,9 +76,9 @@ def vtt_to_token_timestamps(captions):
     token_start_times = []
     for line in all_word_starts_raw:
       starts_ = [
-          {'ts':hit[1], 
+          {'ts_str':hit[1], 
            'tok':hit[3].strip(),
-           'td':parse_timestamp(hit[1])
+           'ts':parse_timestamp(hit[1])
            } 
            for hit in re.findall(pat, line)]
       token_start_times.extend(starts_)
@@ -89,10 +89,9 @@ def srv2_to_token_timestamps(srv2_xml):
     srv2_soup = BeautifulSoup(srv2_xml, 'xml')
     return [
         {
-         'ts':e['t'], 
+         'ts_str':e['t'], 
          'tok':e.text,
-         #'td':dt.timedelta(microseconds=int(e['t']))
-         'td':dt.timedelta(milliseconds=int(e['t']))
+         'ts':dt.timedelta(milliseconds=int(e['t'])).total_seconds()
          } 
         for e in srv2_soup.find_all('text')
         if e.text.strip() 
