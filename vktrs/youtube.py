@@ -53,7 +53,7 @@ def parse_timestamp(ts):
         minutes=t.minute,
         seconds=t.second,
         microseconds=t.microsecond,
-        ).total_seconds
+        ).total_seconds()
 
 def vtt_to_token_timestamps(captions):
 
