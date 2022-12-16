@@ -11,24 +11,74 @@ from collections import defaultdict
 from omegaconf import OmegaConf, DictConfig
 from pathlib import Path
 import time
+from warnings import warn
 
 
-class Project:
-    def __init__(self, name, parent, config_name='config.yaml'):
+class Configable:
+    @property
+    def cfg(self):
+        if not hasattr(self, '_cfg'):
+            raise ValueError(
+                "You should never see this error. Something's wrong."
+                "The _cfg attribute is not present on the class. This attribute "
+                "should have been attached by the __init__ method or the load() method. "
+                "Maybe the attribute was somehow deleted from the class? Please file an issue and/or message @DigThatData"
+                "and explain the circumstances under which you saw this message."
+            )
+            #self._cfg = self.to_config()
+        return self._cfg
+    
+    def to_config(self, extra_params):
+        _d = {
+            'name':self.name,
+            'parent':str(self.parent),
+            'config_name':str(self.root),
+        }
+        cfg = OmegaConf.create(_d)
+        cfg.update(extra_params)
+        return cfg
+    
+    def reload(self):
+        """Alias for the load() method"""
+        self.load()
+
+    def load(self):
+        with self.cfg_fpath.open() as f:
+            self._cfg = OmegaConf.load(f)
+    
+    def checkpoint(self):
+        # do something special if already exists to permit rollback? maybe track file in its own little git?
+        with self.cfg_fpath.open('w') as f:
+            OmegaConf.save(config=self.cfg, f=f)
+
+class Project(Configable):
+    def __init__(
+        self, 
+        name=None, 
+        parent=Path('.'), 
+        config_name='config.yaml',
+        **kwargs
+    ):
         if not name:
-            self.name = self.generate_new_project_name
+            name = self.generate_new_project_name()
         self.name = name
         if not isinstance(parent, Path):
             parent = Path(parent)
-        self.parent
+        self.parent = parent
         self.config_name = config_name
         
         # @property attributes constructed from attributes above
         self.root.mkdir(exist_ok=True, parents=True)
         if self.cfg_fpath.exists():
+            if kwargs:
+                warn(
+                    f"Project {name} already exists, extra initialization arguments will be ignored in favor of persisted values."
+                    "To override the persisted values, run .update(...).checkpoint() after loading the project."
+                    f"ignored arguments: {kwargs}"
+                    )
             self.load()
         else:
-            self.cfg = self.to_cfg()
+            self._cfg = self.to_config(kwargs)
             self.checkpoint()
 
     @property
@@ -39,25 +89,11 @@ class Project:
     def cfg_fpath(self):
         return self.root / self.config_name
 
-    def generate_new_project_name(self):
+    @staticmethod
+    def generate_new_project_name():
         return str(time.time())
     
-    def to_cfg():
-        _d = {
-            'name':self.name,
-            'parent':str(self.parent),
-            'config_name':str(self.root),
-        }
-        return OmegaConf.create(_d)
-    
-    def load(self):
-        with self.cfg_fpath.open() as f:
-            self.cfg = OmegaConf.load(f)
-    
-    def checkpoint(self):
-        # do something special if already exists to permit rollback? maybe track file in its own little git?
-        with self.cfg_fpath.open('w') as f:
-            OmegaConf.save(config=self.cfg, f=f)
+
 
 
 class ProjectVktrs:
@@ -66,11 +102,11 @@ class ProjectVktrs:
 
 
 
-projects_by_type = defaultdict(Project)
+projects_by_type = defaultdict(lambda: Project)
 projects_by_type['vktrs'] = ProjectVktrs
 
 
-class Workspace:
+class Workspace(Configable):
     def __init__(
         self,
         cfg_path='config.yaml',
@@ -80,7 +116,7 @@ class Workspace:
         model_dir='', # want to make it possible for users to share models across process. save on setup time and storage space.
         #output_dir'', # ok.. maybe this one should be in the project setup and not the workspace. more portable projects this way I guess?
         # nah, output dir should be a project config
-        project_type=None
+        project_type=None,
         **kwargs
     ):
         """
@@ -90,17 +126,17 @@ class Workspace:
         self.model_dir = model_dir
 
         if Path(cfg_path).exists():
-            self.load_workspace(cfg_path)
-            return self
+            self.load()
 
         self.cfg_path = cfg_path
         if not project_root:
             project_root = '.'
         self.project_root = Path(project_root)
+        ProjectFactory = projects_by_type[project_type]
         if not active_project_name:
             #self.active_project = self.new_project()
-            active_project_name = self.generate_new_project_name()
-        ProjectFactory = projects_by_type[project_type]
+            active_project_name = ProjectFactory.generate_new_project_name()
+        
         self.active_project = ProjectFactory(active_project_name, project_root)
         self.addl_args = kwargs
         
@@ -130,7 +166,7 @@ class Workspace:
         _d.update(self.addl_attrs)
         return OmegaConf.create(_d)
 
-    def save(self):
+    def checkpoint(self):
         cfg = self.to_cfg()
         with open(self.cfg_path,'w') as fp:
             OmegaConf.save(config=cfg, f=fp.name)

@@ -22,3 +22,5 @@ vae
 model_index.json
 
 _venv
+build
+.DS_Store
