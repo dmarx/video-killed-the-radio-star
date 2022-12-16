@@ -20,3 +20,5 @@ tokenizer
 unet
 vae
 model_index.json
+
+_venv
