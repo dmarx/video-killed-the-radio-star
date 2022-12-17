@@ -119,14 +119,11 @@ class Project(Configable):
         return str(time.time())
 
 
-class ProjectVktrs(Project):
-    def __init__(self, name, parent, config_name='storyboard.yaml', **kwargs):
-        super().__init__(name=name, parent=parent, config_name=config_name, **kwargs)
-
 
 projects_by_type = defaultdict(lambda: Project)
-projects_by_type['vktrs'] = ProjectVktrs
 
+def register_project_type(**kargs):
+    projects_by_type.update(kargs)
 
 class Workspace(Configable):
     def __init__(
