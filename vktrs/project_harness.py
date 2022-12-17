@@ -183,3 +183,17 @@ class Workspace(Configable):
         if hasattr(self, 'active_project'):
             self.active_project.checkpoint()
 
+###########################
+
+
+class ProjectVktrs(Project):
+    def __init__(self, name, parent, config_name='storyboard.yaml', **kwargs):
+        super().__init__(name=name, parent=parent, config_name=config_name, **kwargs)
+        
+    def to_config(self, extra_params):
+        cfg = super().to_config(extra_params)
+        cfg.output_dir = str(Path(cfg.root) / 'frames')
+        return cfg
+
+# NB: this is gonna be an issue unless we pickle the object or define it somewhere we know it'll be run
+register_project_type(vktrs=ProjectVktrs)
