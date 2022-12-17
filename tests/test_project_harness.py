@@ -46,6 +46,8 @@ def test_workspace_vanilla_init():
     assert w.cfg_fpath.exists()
     assert isinstance(w.cfg, DictConfig)
     #################
+    assert not hasattr(w, 'active_project')
+    w.activate_project()
     assert isinstance(w.active_project, Project)
 
 def test_workspace_init_named_project():

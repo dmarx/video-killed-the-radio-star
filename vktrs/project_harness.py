@@ -161,7 +161,8 @@ class Workspace(Configable):
         else:
             logger.debug(kwargs)
             self._cfg = self.to_config(kwargs)
-            self.activate_project()
+            if self._cfg.active_project_name:
+                self.activate_project()
             self.checkpoint()
 
     def load_existing(self, **kwargs):
@@ -182,5 +183,6 @@ class Workspace(Configable):
 
     def checkpoint(self):
         super().checkpoint()
-        self.active_project.checkpoint()
+        if hasattr(self, 'active_project'):
+            self.active_project.checkpoint()
 
