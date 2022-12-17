@@ -12,7 +12,7 @@ from pathlib import Path
 import time
 from warnings import warn
 from loguru import logger
-
+import os
 
 class Configable:
     def __init__(
@@ -132,7 +132,7 @@ class Workspace(Configable):
         active_project_name=None, # project name 
         project_root=None, # where to find the project
         gdrive_mounted='', # motivation here is for use with colab
-        model_dir='', # want to make it possible for users to share models across process. save on setup time and storage space.
+        model_dir=None, # want to make it possible for users to share models across process. save on setup time and storage space.
         #output_dir'', # ok.. maybe this one should be in the project setup and not the workspace. more portable projects this way I guess?
         # nah, output dir should be a project config
         project_type=None,
@@ -144,13 +144,23 @@ class Workspace(Configable):
             root=project_root,
             ####################
             gdrive_mounted=gdrive_mounted,
-            model_dir=model_dir,
+            _model_dir=model_dir,
             project_type=project_type,
             active_project_name=active_project_name,
         )
         logger.debug(self.cfg)
         logger.debug(self.cfg.active_project_name)
         #self.load()
+    
+    @property
+    def model_dir(self):
+        _model_dir = self.cfg.get('_model_dir')
+        if not _model_dir:
+            #_model_dir=str(Path(os.environ.get('XDG_CACHE_HOME')))
+            _model_dir = os.environ.get('XDG_CACHE_HOME')
+        if not _model_dir:
+            _model_dir = Path('~/.cache').expanduser() / 'models'
+        return _model_dir
 
     def load(self, **kwargs):
         if self.cfg_fpath.exists():

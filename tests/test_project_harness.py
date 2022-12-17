@@ -55,3 +55,8 @@ def test_workspace_init_named_project():
     w = Workspace(active_project_name=projname)
     logger.debug(w.cfg)
     assert w.active_project.name == projname
+
+def test_workspace_default_model_dir():
+    w = Workspace()
+    assert len(str(w.model_dir)) > 0
+    assert w.model_dir is not None
