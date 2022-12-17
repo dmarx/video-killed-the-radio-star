@@ -117,12 +117,43 @@ class ProjectVktrs(Project):
         super().__init__(name=name, parent=parent, config_name=config_name, **kwargs)
 
 
-
 projects_by_type = defaultdict(lambda: Project)
 projects_by_type['vktrs'] = ProjectVktrs
 
 
 class Workspace(Configable):
+    def __init__(
+        self,
+        cfg_path='workspace_config.yaml',
+        active_project_name=None, # project name 
+        project_root=None, # where to find the project
+        gdrive_mounted='', # motivation here is for use with colab
+        model_dir='', # want to make it possible for users to share models across process. save on setup time and storage space.
+        #output_dir'', # ok.. maybe this one should be in the project setup and not the workspace. more portable projects this way I guess?
+        # nah, output dir should be a project config
+        project_type=None,
+        **kwargs
+    ):
+        super().__init__(
+            config_name=cfg_path,
+            root=project_root,
+            ####################
+            gdrive_mounted=gdrive_mounted,
+            model_dir=model_dir,
+            project_type=project_type,
+            active_project_name=active_project_name,
+        )
+        self.load_project()
+
+    def load_project(self):
+        ProjectFactory = projects_by_type[self.cfg.project_type]
+        self.active_project = ProjectFactory(self.cfg.active_project_name, project_root=self.root)
+    def load(self):
+        super().load()
+        self.load_project()
+
+
+class Workspace_OLD(Configable):
     def __init__(
         self,
         cfg_path='config.yaml',
@@ -150,7 +181,6 @@ class Workspace(Configable):
         self.project_root = Path(project_root)
         ProjectFactory = projects_by_type[project_type]
         if not active_project_name:
-            #self.active_project = self.new_project()
             active_project_name = ProjectFactory.generate_new_project_name()
         
         self.active_project = ProjectFactory(active_project_name, project_root)

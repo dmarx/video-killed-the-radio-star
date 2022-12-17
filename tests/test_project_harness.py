@@ -3,8 +3,6 @@ from omegaconf import OmegaConf, DictConfig
 from pathlib import Path
 import pytest
 
-def test_workspace_vanilla_init():
-    w = Workspace()
 
 def test_project_vanilla_init():
     p = Project()
@@ -38,3 +36,13 @@ def test_project_checkpoint_and_refresh():
     p2.reload()
     assert p2.cfg.foo == 'bar'
 
+#################################################
+
+def test_workspace_vanilla_init():
+    w = Workspace()
+    assert w.name is None
+    assert w.root.exists()
+    assert w.cfg_fpath.exists()
+    assert isinstance(w.cfg, DictConfig)
+    #################
+    assert isinstance(w.active_project, Project)
