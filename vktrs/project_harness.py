@@ -112,9 +112,9 @@ class Project(Configable):
 
 
 
-class ProjectVktrs:
-    def __init__(self, name, parent, config_name='storyboard.yaml'):
-        super().__init__(name, parent, config_name)
+class ProjectVktrs(Project):
+    def __init__(self, name, parent, config_name='storyboard.yaml', **kwargs):
+        super().__init__(name=name, parent=parent, config_name=config_name, **kwargs)
 
 
 
