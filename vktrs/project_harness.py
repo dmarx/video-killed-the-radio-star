@@ -143,7 +143,7 @@ class Workspace(Configable):
             project_type=project_type,
             active_project_name=active_project_name,
         )
-        self.load_project()
+        self.load()
 
     def load_project(self):
         ProjectFactory = projects_by_type[self.cfg.project_type]
