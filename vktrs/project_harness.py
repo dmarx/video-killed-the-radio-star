@@ -15,6 +15,38 @@ from warnings import warn
 
 
 class Configable:
+    def __init__(
+        self, 
+        name=None, 
+        root=None,
+        config_name='config.yaml',
+        **kwargs
+    ):
+        self.config_name = config_name
+        self.name = name
+
+        if root is None:
+            root = Path('.')
+        self.root = root
+        
+        # @property attributes constructed from attributes above
+        self.root.mkdir(exist_ok=True, parents=True)
+        if self.cfg_fpath.exists():
+            if kwargs:
+                warn(
+                    f"Config file {str(self.cfg_fpath)} already exists, extra initialization arguments will be ignored in favor of persisted values."
+                    "To override the persisted values, run .update(...).checkpoint() after loading the project."
+                    f"ignored arguments: {kwargs}"
+                    )
+            self.load()
+        else:
+            self._cfg = self.to_config(kwargs)
+            self.checkpoint()
+
+    @property
+    def cfg_fpath(self):
+        return self.root / self.config_name
+
     @property
     def cfg(self):
         if not hasattr(self, '_cfg'):
@@ -31,8 +63,7 @@ class Configable:
     def to_config(self, extra_params):
         _d = {
             'name':self.name,
-            'parent':str(self.parent),
-            'config_name':str(self.root),
+            'root':str(self.root),
         }
         cfg = OmegaConf.create(_d)
         cfg.update(extra_params)
@@ -51,44 +82,29 @@ class Configable:
         with self.cfg_fpath.open('w') as f:
             OmegaConf.save(config=self.cfg, f=f)
 
+
 class Project(Configable):
     def __init__(
         self, 
         name=None, 
-        parent=Path('.'), 
+        parent=None, 
         config_name='config.yaml',
         **kwargs
     ):
-        if not name:
-            name = self.generate_new_project_name()
-        self.name = name
+        if parent is None:
+            parent = Path('.')
         if not isinstance(parent, Path):
             parent = Path(parent)
-        self.parent = parent
-        self.config_name = config_name
-        
-        # @property attributes constructed from attributes above
-        self.root.mkdir(exist_ok=True, parents=True)
-        if self.cfg_fpath.exists():
-            if kwargs:
-                warn(
-                    f"Project {name} already exists, extra initialization arguments will be ignored in favor of persisted values."
-                    "To override the persisted values, run .update(...).checkpoint() after loading the project."
-                    f"ignored arguments: {kwargs}"
-                    )
-            self.load()
-        else:
-            self._cfg = self.to_config(kwargs)
-            self.checkpoint()
-
-    @property
-    def root(self):
-        return self.parent / self.name
-
-    @property
-    def cfg_fpath(self):
-        return self.root / self.config_name
-
+        if not name:
+            name = self.generate_new_project_name()
+        root = parent / name
+        super().__init__(
+            name=name,
+            root=root,
+            config_name=config_name,
+            **kwargs,
+        )
+    
     @staticmethod
     def generate_new_project_name():
         return str(time.time())
