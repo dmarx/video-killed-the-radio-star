@@ -27,6 +27,8 @@ class Configable:
 
         if root is None:
             root = Path('.')
+        if not isinstance(root, Path):
+            root = Path(root)
         self.root = root
         
         # @property attributes constructed from attributes above
@@ -195,6 +197,8 @@ class Workspace(Configable):
 
 ###########################
 
+# to do: need a better (i.e. more persistent) way to register custom objects like this.
+# maybe some sort of simple plugin system? namespace modules maybe?
 
 class ProjectVktrs(Project):
     def __init__(self, name, parent, config_name='storyboard.yaml', **kwargs):
