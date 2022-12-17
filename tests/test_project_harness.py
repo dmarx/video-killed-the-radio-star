@@ -2,6 +2,7 @@ from vktrs.project_harness import Project, Workspace
 from omegaconf import OmegaConf, DictConfig
 from pathlib import Path
 import pytest
+from loguru import logger
 
 
 def test_project_vanilla_init():
@@ -46,3 +47,9 @@ def test_workspace_vanilla_init():
     assert isinstance(w.cfg, DictConfig)
     #################
     assert isinstance(w.active_project, Project)
+
+def test_workspace_init_named_project():
+    projname = 'testproj'
+    w = Workspace(active_project_name=projname)
+    logger.debug(w.cfg)
+    assert w.active_project.name == projname

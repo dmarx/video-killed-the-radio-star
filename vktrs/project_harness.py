@@ -6,12 +6,12 @@ Anyway, idea with this module is to provide a generic, opinionated project layou
 - designing notebooks with shared tooling and features, specifically robust resume
 - reusing models
 """
-
 from collections import defaultdict
 from omegaconf import OmegaConf, DictConfig
 from pathlib import Path
 import time
 from warnings import warn
+from loguru import logger
 
 
 class Configable:
@@ -31,17 +31,7 @@ class Configable:
         
         # @property attributes constructed from attributes above
         self.root.mkdir(exist_ok=True, parents=True)
-        if self.cfg_fpath.exists():
-            if kwargs:
-                warn(
-                    f"Config file {str(self.cfg_fpath)} already exists, extra initialization arguments will be ignored in favor of persisted values."
-                    "To override the persisted values, run .update(...).checkpoint() after loading the project."
-                    f"ignored arguments: {kwargs}"
-                    )
-            self.load()
-        else:
-            self._cfg = self.to_config(kwargs)
-            self.checkpoint()
+        self.load(**kwargs)
 
     @property
     def cfg_fpath(self):
@@ -59,21 +49,39 @@ class Configable:
             )
             #self._cfg = self.to_config()
         return self._cfg
-    
+
     def to_config(self, extra_params):
         _d = {
             'name':self.name,
             'root':str(self.root),
         }
         cfg = OmegaConf.create(_d)
+        logger.debug(cfg)
+        logger.debug(extra_params)
         cfg.update(extra_params)
+        logger.debug(cfg)
         return cfg
     
     def reload(self):
         """Alias for the load() method"""
         self.load()
 
-    def load(self):
+    def load(self, **kwargs):
+        if self.cfg_fpath.exists():
+            self.load_existing(**kwargs)
+        else:
+            logger.debug(kwargs)
+            self._cfg = self.to_config(kwargs)
+            self.checkpoint()
+    
+    def load_existing(self, **kwargs):
+        if kwargs:
+            warn(
+                f"Config file {str(self.cfg_fpath)} already exists, extra initialization arguments will be ignored in favor of persisted values."
+                "To override the persisted values, run .update(...).checkpoint() after loading the project."
+                f"ignored arguments: {kwargs}"
+                )
+        logger.debug(f"loading {self.cfg_fpath}")
         with self.cfg_fpath.open() as f:
             self._cfg = OmegaConf.load(f)
     
@@ -91,6 +99,7 @@ class Project(Configable):
         config_name='config.yaml',
         **kwargs
     ):
+        logger.debug(name)
         if parent is None:
             parent = Path('.')
         if not isinstance(parent, Path):
@@ -108,8 +117,6 @@ class Project(Configable):
     @staticmethod
     def generate_new_project_name():
         return str(time.time())
-    
-
 
 
 class ProjectVktrs(Project):
@@ -134,6 +141,7 @@ class Workspace(Configable):
         project_type=None,
         **kwargs
     ):
+        logger.debug(active_project_name)
         super().__init__(
             config_name=cfg_path,
             root=project_root,
@@ -143,83 +151,36 @@ class Workspace(Configable):
             project_type=project_type,
             active_project_name=active_project_name,
         )
-        self.load()
+        logger.debug(self.cfg)
+        logger.debug(self.cfg.active_project_name)
+        #self.load()
 
-    def _load_project(self):
-        ProjectFactory = projects_by_type[self.cfg.project_type]
-        self.active_project = ProjectFactory(self.cfg.active_project_name, project_root=self.root)
+    def load(self, **kwargs):
+        if self.cfg_fpath.exists():
+            self.load_existing(**kwargs)
+        else:
+            logger.debug(kwargs)
+            self._cfg = self.to_config(kwargs)
+            self.activate_project()
+            self.checkpoint()
 
-    def load(self):
-        super().load()
-        self._load_project()
+    def load_existing(self, **kwargs):
+        logger.debug(f"loading {self.cfg_fpath}")
+        with self.cfg_fpath.open() as f:
+            self._cfg = OmegaConf.load(f)
+        self._cfg.update(kwargs)
+        self.activate_project()
+        self.checkpoint()
+
+    def activate_project(self, name=None):
+        if not name:
+            name = self.cfg.active_project_name
+        ProjectFactory = projects_by_type[self.cfg.root]
+        self.active_project = ProjectFactory(name, self.cfg.root)
+        self._cfg.update({"active_project":self.active_project.cfg})
+        logger.debug(self._cfg)
 
     def checkpoint(self):
         super().checkpoint()
         self.active_project.checkpoint()
 
-
-
-class Workspace_OLD(Configable):
-    def __init__(
-        self,
-        cfg_path='config.yaml',
-        active_project_name='', # project name 
-        project_root='', # where to find the project
-        gdrive_mounted='', # motivation here is for use with colab
-        model_dir='', # want to make it possible for users to share models across process. save on setup time and storage space.
-        #output_dir'', # ok.. maybe this one should be in the project setup and not the workspace. more portable projects this way I guess?
-        # nah, output dir should be a project config
-        project_type=None,
-        **kwargs
-    ):
-        """
-        Create a new workspace
-        """
-        self.gdrive_mounted = gdrive_mounted
-        self.model_dir = model_dir
-
-        if Path(cfg_path).exists():
-            self.load()
-
-        self.cfg_path = cfg_path
-        if not project_root:
-            project_root = '.'
-        self.project_root = Path(project_root)
-        ProjectFactory = projects_by_type[project_type]
-        if not active_project_name:
-            active_project_name = ProjectFactory.generate_new_project_name()
-        
-        self.active_project = ProjectFactory(active_project_name, project_root)
-        self.addl_args = kwargs
-        
-
-    def load_workspace(self, cfg_path=None):
-        if cfg_path is None:
-            cfg_path = self.cfg_path
-        with Path(cfg_path).open() as f:
-            cfg = OmegaConf.load(cfg)
-            return self.from_config(cfg)
-
-    @staticmethod
-    def from_config(cfg:DictConfig):
-        raise NotImplementedError
-
-    def to_cfg(self) -> DictConfig:
-        _d = {
-            'active_project':self.active_project.name,
-            'project_root':self.project_root,
-            'gdrive_mounted':self.gdrive_mounted,
-            'model_dir':self.model_dir,
-            'output_dir':self.output_dir,
-            #'output_dir':'${active_project}/frames', # sure why not
-            ########################################
-            #'use_stability_api':use_stability_api,
-        }
-        _d.update(self.addl_attrs)
-        return OmegaConf.create(_d)
-
-    def checkpoint(self):
-        cfg = self.to_cfg()
-        with open(self.cfg_path,'w') as fp:
-            OmegaConf.save(config=cfg, f=fp.name)
-            
