@@ -145,12 +145,18 @@ class Workspace(Configable):
         )
         self.load()
 
-    def load_project(self):
+    def _load_project(self):
         ProjectFactory = projects_by_type[self.cfg.project_type]
         self.active_project = ProjectFactory(self.cfg.active_project_name, project_root=self.root)
+
     def load(self):
         super().load()
-        self.load_project()
+        self._load_project()
+
+    def checkpoint(self):
+        super().checkpoint()
+        self.active_project.checkpoint()
+
 
 
 class Workspace_OLD(Configable):
