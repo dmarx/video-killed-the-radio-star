@@ -76,7 +76,7 @@ class HfHelper:
         prompt,
         **kwargs
     ):
-        f = self.text2img if kwargs.get('init_image') is None else self.img2img
+        f = self.text2img if kwargs.get('image') is None else self.img2img
         #if kwargs.get('image_consistency') is not None:
         #kwargs['strength'] = 1- kwargs['image_consistency'] 
         if kwargs.get('start_schedule') is not None:
