@@ -117,7 +117,7 @@ def save_frame(
 def get_image_sequence(idx, root):
     root = Path(root)
     images = (root / 'frames' ).glob(f'{idx}-*.png')
-    images = sorted(images, key=os.path.getmtime)
+    images = sorted(list(images), key=os.path.getmtime)
     return images
 
 
