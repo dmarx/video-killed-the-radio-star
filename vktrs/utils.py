@@ -62,16 +62,16 @@ def sanitize_folder_name(fp):
 
 
 def add_caption2image(
-      image, 
-      caption, 
-      text_font='LiberationSans-Regular.ttf', 
-      font_size=20,
-      fill_color=(255, 255, 255),
-      stroke_color=(0, 0, 0), #stroke_fill
-      stroke_width=2,
-      align='center',
-      ):
-    # via https://stackoverflow.com/a/59104505/819544
+    image, 
+    caption, 
+    text_font='LiberationSans-Regular.ttf', 
+    font_size=20,
+    fill_color=(255, 255, 255),
+    stroke_color=(0, 0, 0), #stroke_fill
+    stroke_width=2,
+    align='center',
+):
+# via https://stackoverflow.com/a/59104505/819544
     wrapper = textwrap.TextWrapper(width=50) 
     word_list = wrapper.wrap(text=caption) 
     caption_new = ''
