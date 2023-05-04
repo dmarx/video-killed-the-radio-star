@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 import random
 import string
@@ -113,24 +114,10 @@ def save_frame(
     return str(outpath)
 
 
-def get_image_sequence(idx, root, init_first=True):
+def get_image_sequence(idx, root):
     root = Path(root)
     images = (root / 'frames' ).glob(f'{idx}-*.png')
-    images = [str(fp) for fp in images]
-    if init_first:
-        init_image = None
-        images2 = []
-        for i, fp in enumerate(images):
-            if 'anchor' in fp:
-                init_image = fp
-            else:
-                images2.append(fp)
-        if not init_image:
-            try:
-                init_image, images2 = images2[0], images2[1:]
-                images = [init_image] + images2
-            except IndexError:
-                images = images2
+    images = sorted(images, key=os.path.getmtime)
     return images
 
 
