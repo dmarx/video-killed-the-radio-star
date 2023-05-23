@@ -1,5 +1,6 @@
 _venv
 
+
 *.srv2
 *.vtt
 *.webm
@@ -7,7 +8,8 @@ _venv
 *.mp4
 *.pyc
 *.egg-info/
-frames
+**/frames
+**/archive
 *.yaml
 *.whl
 *.tar.gz
